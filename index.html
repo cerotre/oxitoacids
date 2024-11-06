@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Joc de Memòria d'Àcids</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            text-align: center; 
+            background-color: #f0f8ff;
+            color: #333;
+        }
+        h1 {
+            font-size: 2em;
+            color: #006699;
+            margin-top: 20px;
+        }
+        .question { 
+            font-size: 1.5em; 
+            margin: 20px; 
+            font-weight: bold;
+            color: #333;
+        }
+        .instructions {
+            font-size: 1em;
+            margin: 15px;
+            color: #555;
+        }
+        .options { 
+            display: flex; 
+            justify-content: center; 
+            gap: 10px; 
+            flex-wrap: wrap; 
+            margin: 20px;
+        }
+        .option { 
+            padding: 15px 25px; 
+            border: 2px solid #006699; 
+            border-radius: 5px;
+            background-color: #e6f7ff;
+            cursor: pointer; 
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        .option:hover {
+            background-color: #b3e0ff;
+        }
+        .option:active {
+            transform: scale(0.95);
+        }
+        .correct { 
+            color: green; 
+            font-weight: bold;
+        }
+        .incorrect { 
+            color: red; 
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Joc de Memòria d'Àcids</h1>
+    <p class="instructions">Tria la resposta correcta per al nom de l'àcid donat. Bona sort!</p>
+    <p class="question" id="question">Carregant la pregunta...</p>
+    <div class="options" id="options"></div>
+    <p id="feedback"></p>
+
+    <script>
+        const data = [
+            {"grup": 13, "element": "B", "estatOxidacio": "III", "formula": "H3BO3", "nom": "Àcid ortobòric o bòric"},
+            {"grup": 13, "element": "B", "estatOxidacio": "III", "formula": "HBO2", "nom": "Àcid metabòric"},
+            {"grup": 13, "element": "C", "estatOxidacio": "IV", "formula": "H2CO3", "nom": "Àcid carbònic"},
+            {"grup": 14, "element": "Si", "estatOxidacio": "IV", "formula": "H4SiO4", "nom": "Àcid ortosilícic o silícic"},
+            {"grup": 14, "element": "Si", "estatOxidacio": "IV", "formula": "H2SiO3", "nom": "Àcid metasilícic"},
+            {"grup": 15, "element": "N", "estatOxidacio": "V", "formula": "HNO3", "nom": "Àcid nítric"},
+            {"grup": 15, "element": "N", "estatOxidacio": "III", "formula": "HNO2", "nom": "Àcid nitrós"},
+            {"grup": 15, "element": "P", "estatOxidacio": "V", "formula": "H3PO4", "nom": "Àcid ortofosfòric o fosfòric"},
+            {"grup": 15, "element": "P", "estatOxidacio": "III", "formula": "HPO3", "nom": "Àcid metafosfòric"},
+            {"grup": 15, "element": "P", "estatOxidacio": "IV", "formula": "H4P2O7", "nom": "Àcid difosfòric"},
+            {"grup": 15, "element": "As", "estatOxidacio": "V", "formula": "H3AsO4", "nom": "Àcid ortoarsènic o arsènic"},
+            {"grup": 16, "element": "S", "estatOxidacio": "IV", "formula": "H2SO3", "nom": "Àcid sulfurós"},
+            {"grup": 16, "element": "S", "estatOxidacio": "VI", "formula": "H2SO4", "nom": "Àcid sulfúric"},
+            {"grup": 16, "element": "S", "estatOxidacio": "II", "formula": "H2S2O3", "nom": "Àcid tiosulfúric"},
+            {"grup": 16, "element": "Se", "estatOxidacio": "IV", "formula": "H2SeO3", "nom": "Àcid seleniós"},
+            {"grup": 16, "element": "Se", "estatOxidacio": "VI", "formula": "H2SeO4", "nom": "Àcid selènic"},
+            {"grup": 17, "element": "Cl", "estatOxidacio": "I", "formula": "HClO", "nom": "Àcid hipoclorós"},
+            {"grup": 17, "element": "Cl", "estatOxidacio": "III", "formula": "HClO2", "nom": "Àcid clorós"},
+            {"grup": 17, "element": "Cl", "estatOxidacio": "V", "formula": "HClO3", "nom": "Àcid clòric"},
+            {"grup": 17, "element": "Cl", "estatOxidacio": "VII", "formula": "HClO4", "nom": "Àcid perclòric"},
+            {"grup": 17, "element": "Br", "estatOxidacio": "I", "formula": "HBrO", "nom": "Àcid hipobromós"},
+            {"grup": 17, "element": "Br", "estatOxidacio": "III", "formula": "HBrO2", "nom": "Àcid bromós"},
+            {"grup": 17, "element": "Br", "estatOxidacio": "V", "formula": "HBrO3", "nom": "Àcid bròmic"},
+            {"grup": 17, "element": "Br", "estatOxidacio": "VII", "formula": "HBrO4", "nom": "Àcid perbròmic"},
+            {"grup": 17, "element": "I", "estatOxidacio": "I", "formula": "HIO", "nom": "Àcid hipoiodós"},
+            {"grup": 17, "element": "I", "estatOxidacio": "III", "formula": "HIO2", "nom": "Àcid iodós"},
+            {"grup": 17, "element": "I", "estatOxidacio": "V", "formula": "HIO3", "nom": "Àcid iòdic"},
+            {"grup": 17, "element": "I", "estatOxidacio": "VII", "formula": "HIO4", "nom": "Àcid periódic"},
+            {"grup": "Metalls", "element": "Cr", "estatOxidacio": "VI", "formula": "H2CrO4", "nom": "Àcid cròmic"},
+            {"grup": "Metalls", "element": "Cr", "estatOxidacio": "VI", "formula": "H2Cr2O7", "nom": "Àcid dicròmic"},
+            {"grup": "Metalls", "element": "Mn", "estatOxidacio": "VII", "formula": "HMnO4", "nom": "Àcid permangànic"}
+        ];
+
+        function getRandomQuestion(data) {
+            const questionIndex = Math.floor(Math.random() * data.length);
+            const question = data[questionIndex];
+            const correctAnswer = question.nom;
+
+            const options = data.map(item => item.nom);
+            const shuffledOptions = shuffleArray([correctAnswer, ...getRandomOptions(options, correctAnswer)]);
+
+            return { question, correctAnswer, shuffledOptions };
+        }
+
+        function getRandomOptions(options, correctAnswer) {
+            const filteredOptions = options.filter(option => option !== correctAnswer);
+            return filteredOptions.sort(() => 0.5 - Math.random()).slice(0, 3);
+        }
+
+        function shuffleArray(array) {
+            return array.sort(() => 0.5 - Math.random());
+        }
+
+        function loadQuestion() {
+            const { question, correctAnswer, shuffledOptions } = getRandomQuestion(data);
+            document.getElementById("question").textContent = `Quin és el nom de l'àcid ${question.formula}?`;
+            const optionsContainer = document.getElementById("options");
+            optionsContainer.innerHTML = "";
+            shuffledOptions.forEach(option => {
+                const optionElement = document.createElement("div");
+                optionElement.className = "option";
+                optionElement.textContent = option;
+                optionElement.addEventListener("click", () => checkAnswer(option, correctAnswer));
+                optionsContainer.appendChild(optionElement);
+            });
+            document.getElementById("feedback").textContent = "";
+        }
+
+        function checkAnswer(selectedAnswer, correctAnswer) {
+            const feedback = document.getElementById("feedback");
+            if (selectedAnswer === correctAnswer) {
+                feedback.innerHTML = `<span class="correct">Correcte!</span>`;
+            } else {
+                feedback.innerHTML = `<span class="incorrect">Incorrecte. La resposta correcta és: ${correctAnswer}</span>`;
+            }
+            setTimeout(loadQuestion, 2000);
+        }
+
+        loadQuestion();
+    </script>
+</body>
+</html>
