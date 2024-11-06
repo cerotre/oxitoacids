@@ -138,7 +138,7 @@
                 feedback.textContent = "Resposta incorrecta!";
                 feedback.className = "incorrect";
             }
-            loadQuestion();
+            setTimeout(loadQuestion, 2000);
             return false; // Prevent form submission
         }
 
